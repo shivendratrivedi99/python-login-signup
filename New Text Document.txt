@@ -1,0 +1,101 @@
+from tkinter import *
+from sqlite3 import *
+import sqlite3
+from tkinter import filedialog
+import easygui
+
+class Gui:
+    def __init__(s):
+        s.home()
+    def display_in_table_list(s):
+        c=0
+        l.delete(0,END)
+        for i in ls:
+            print(i[0])
+            l.insert(c,i[0])
+            c=c+1
+
+    def reload_db(s):
+        cu.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        global ls
+        ls=list(cu.fetchall())
+        
+    def opens(s):
+        global cu
+        global client
+        a=filedialog.askopenfilename()
+        print(a)
+        client=sqlite3.connect(a)
+        cu=client.cursor()
+        reload_db()
+        print(ls)
+        display_in_table_list()
+
+
+    def render_table_list(s):
+        reload_db()
+        display_in_table_list()
+        
+    def table_entry_popup(s):
+        fields=["table_name","field1","field2","field3"]
+        myvar = easygui.multenterbox("Fill out all boxes","Input table fields",fields)
+        cu.execute('create table {}(id int(12) unique,{} varchar(50),{} varchar(50),{} varchar(50))'.format(myvar[0],myvar[1],myvar[2],myvar[3]))
+        render_table_list()
+    def create(s):
+        #if l.get(l.curselection()):
+            table_entry_popup()
+
+
+        
+    def delete(s):
+        table_name=l.get(l.curselection())
+        print(table_name)
+        cu.execute('DROP TABLE IF EXISTS {}'.format(table_name))
+        render_table_list()
+
+
+
+    def go(s):
+        print(l.get(l.curselection()))
+        current_table=l.get(l.curselection())
+        a=cu.execute('select * from {}'.format(current_table))
+        print(cu.fetchall())
+
+    def execute(s):
+        current_table=l.get(l.curselection())
+        cu.execute(query.get())
+        cu.execute('select * from {}'.format(current_table))
+        print(cu.fetchall())
+
+    def home(s):
+        s.scr=Tk(className="Database Browser")
+        s.scr.geometry('800x485+0+0')#'widthxheight+x+y
+        s.scr.config(bg='azure3')
+        l=Label(scr,bg='azure4',font=('times',25,'bold'))
+        l.pack(side=TOP,fill=X)
+        b1=Button(scr,text='Open',command=opens,bg='azure3',fg='black',font=('times',15,'bold'))
+        b1.place(x=0,y=0)
+        b1=Button(scr,text='Create',command=create,bg='azure3',fg='black',font=('times',15,'bold'))
+        b1.place(x=370,y=0)
+        b1=Button(scr,text='Delete',command=delete,bg='azure3',fg='black',font=('times',15,'bold'))
+        b1.place(x=725,y=0)
+        l=Listbox(scr,bg='white',width=20,height=12,font=('times',20,'bold'))
+        l.place(x=0,y=45)
+
+        t=Text(scr,width=63,height=24)
+        t.place(x=288,y=45)
+
+        b1=Button(scr,text='Go',command=go,bg='azure3',fg='black',font=('times',15,'bold'))
+        b1.place(x=240,y=440)
+        query=Entry(scr,bg='white',fg='black',font=('times',25,'bold'))
+        query.place(x=288,y=440)
+        b1=Button(scr,command=execute,text='Execute',bg='azure3',fg='black',font=('times',15,'bold'))
+        b1.place(x=710,y=440)
+    
+        
+    
+
+
+
+
+    
